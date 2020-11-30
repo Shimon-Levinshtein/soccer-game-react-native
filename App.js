@@ -1,15 +1,30 @@
 import { StatusBar } from 'expo-status-bar';
 import React, { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import * as Font from 'expo-font';
+import { AppLoading } from 'expo';
+
 import Header from './components/Header';
 import StartGameScreem from './screens/StartGameScreem';
 import GameScreem from './screens/GameScreem';
 import GameOverScreem from './screens/GameOverScreem';
 
+const fetchFonts = () => {
+  return Font.loadAsync({
+    'open-Sans': require('./assets/fonts/OpenSans-Regular.ttf'),
+    'open-Sans-bold': require('./assets/fonts/OpenSans-Bold.ttf'),
+  });
+};
+
 export default function App() {
 
   const [userNumber, setUserNumber] = useState();
   const [guessRounds, setGuessRounds] = useState(0);
+  const [dataLoaded, setDataLoaded] = useState(false);
+
+  if (!dataLoaded) {
+    return <AppLoading startAsync={fetchFonts} onFinish={() => setDataLoaded(true)} onError={err => console.log(arr)} />
+  };
 
   const configureNewGameHendler = () => {
     setGuessRounds(0);
@@ -29,7 +44,7 @@ export default function App() {
   if (userNumber && guessRounds <= 0) {
     content = <GameScreem userChoice={userNumber} onGameOver={GameOverHendler} />
   } else if (guessRounds > 0) {
-    content = <GameOverScreem roundsNumber={guessRounds} userNumber={userNumber} onRestart={configureNewGameHendler}/>
+    content = <GameOverScreem roundsNumber={guessRounds} userNumber={userNumber} onRestart={configureNewGameHendler} />
   }
 
   return (
