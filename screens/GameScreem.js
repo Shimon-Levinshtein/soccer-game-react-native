@@ -1,7 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { StyleSheet, Text, View, Button, TouchableWithoutFeedback, Keyboard, Alert } from 'react-native';
+import { StyleSheet, Text, View, Alert, ScrollView } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+
 import Card from '../components/Card';
 import NumberContaner from '../components/NumberContaner';
+import DefaultStyles from '../constants/defaultd-styles';
+import MainButton from '../components/MainButton';
+import BodyText from '../components/BodyText';
+
+
 
 const genereteRandomBetween = (min, max, exclude) => {
     min = Math.ceil(min);
@@ -14,10 +21,17 @@ const genereteRandomBetween = (min, max, exclude) => {
     }
 };
 
-const StartScreem = props => {
+const renderListItem = (value, numOfRound) => (
+    <View key={value} style={styles.listItem}>
+        <BodyText>#{numOfRound}</BodyText>
+        <BodyText>{value}</BodyText>
+    </View>
+);
 
-    const [currentGuess, setCurrentGuess] = useState(genereteRandomBetween(1, 100, props.userChoice));
-    const [rounds, setRounds] = useState(0);
+const StartScreem = props => {
+    const initiallGuss = genereteRandomBetween(1, 100, props.userChoice)
+    const [currentGuess, setCurrentGuess] = useState(initiallGuss);
+    const [pastGuesses, setPastGuesses] = useState([initiallGuss]);
 
     const cuttentLow = useRef(1);
     const cuttentHigh = useRef(100);
@@ -25,16 +39,14 @@ const StartScreem = props => {
     const { userChoice, onGameOver } = props;
 
     useEffect(() => {
-        console.log('useEffect');
-        console.log(currentGuess === userChoice);
         if (currentGuess === userChoice) {
-            onGameOver(rounds);
+            onGameOver(pastGuesses.length);
         };
     }, [currentGuess, userChoice, onGameOver]);
 
     const nextGuessHandler = direction => {
         if ((direction === 'lower' && currentGuess < props.userChoice) ||
-         (direction === 'greater' && currentGuess > props.userChoice)) {
+            (direction === 'greater' && currentGuess > props.userChoice)) {
             Alert.alert("Don't lie!", 'You know that this is wrong...', [{ text: 'Sorry!', style: 'cancel' }]);
             return;
         };
@@ -45,17 +57,26 @@ const StartScreem = props => {
         }
         const nextNumber = genereteRandomBetween(cuttentLow.current, cuttentHigh.current, currentGuess);
         setCurrentGuess(nextNumber);
-        setRounds(curRounds => curRounds + 1);
+        setPastGuesses(curPastGuesses => [nextNumber, ...curPastGuesses])
     };
 
     return (
         <View style={styles.screen}>
-            <Text>Opponent's Guess</Text>
+            <Text style={DefaultStyles.title}>Opponent's Guess</Text>
             <NumberContaner>{currentGuess}</NumberContaner>
             <Card style={styles.buttonContiner}>
-                <Button title='LOWER' onPress={nextGuessHandler.bind(this, 'lower')} />
-                <Button title='GREATER' onPress={nextGuessHandler.bind(this, 'greater')} />
+                <MainButton onPress={nextGuessHandler.bind(this, 'lower')} >
+                    <Ionicons name="md-remove" size={24} color='white' />
+                </MainButton>
+                <MainButton onPress={nextGuessHandler.bind(this, 'greater')} >
+                    <Ionicons name="md-add" size={24} color='white' />
+                </MainButton>
             </Card>
+            <View style={styles.list}>
+            <ScrollView>
+                {pastGuesses.map((guess, index) => renderListItem(guess, index + 1))}
+            </ScrollView>
+            </View>
         </View>
     );
 };
@@ -71,8 +92,20 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-around',
         marginTop: 20,
-        width: 300,
-        maxWidth: '80%',
+        width: 400,
+        maxWidth: '90%',
+    },
+    list: {
+        width: '80%'
+    },
+    listItem: {
+        borderColor: '#ccc',
+        borderWidth: 1,
+        padding: 15,
+        marginVertical: 10,
+        backgroundColor: 'white',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
     },
 });
 
