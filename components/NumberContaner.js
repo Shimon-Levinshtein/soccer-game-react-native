@@ -1,4 +1,4 @@
-import React, { PropTypes } from 'react';
+import React from 'react';
 import { StyleSheet, Text, View, TextInput, Button } from 'react-native';
 import Colors from '../constants/colors';
 
